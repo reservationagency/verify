@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IranFly — Booking Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#14306B;--sky:#2F7BD8;--sea:#E8F1FB;--ink:#16202E;--muted:#5E6B7D;--line:#DCE3EC;--ok:#1E8A5A;--bad:#B23A2E}
+*{box-sizing:border-box;margin:0}
+body{font-family:Inter,sans-serif;background:#F5F7FA;color:var(--ink);line-height:1.7}
+.bar{background:#fff;border-bottom:1px solid var(--line)}
+.bar .in{max-width:880px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--navy)}
+.brand img{height:40px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.hero{position:relative;height:260px;background:var(--navy) url("hotel.jpg") center/cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(10,25,55,.85))}
+.hero .in{position:absolute;inset:auto 0 0;z-index:1;max-width:880px;margin:auto;padding:24px 20px;color:#fff}
+.hero h1{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;line-height:1.25}
+.hero p{opacity:.9;font-size:.95rem}
+main{max-width:880px;margin:auto;padding:0 20px 48px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:-28px;position:relative;z-index:2;overflow:hidden}
+.verdict{display:flex;align-items:center;gap:16px;padding:22px 24px;border-bottom:1px solid var(--line)}
+.mark{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:1.6rem;font-weight:800}
+.ok .mark{background:var(--ok)} .bad .mark{background:var(--bad)}
+.verdict h2{font-size:1.35rem;font-weight:800}
+.ok h2{color:var(--ok)} .bad h2{color:var(--bad)}
+.verdict p{color:var(--muted);font-size:.92rem}
+.pnr{direction:ltr;unicode-bidi:isolate;font-weight:700;color:var(--navy)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.grid div{padding:16px 24px;border-bottom:1px solid var(--line)}
+.grid dt{color:var(--muted);font-size:.85rem}
+.grid dd{font-weight:700;font-size:1.05rem}
+.ltr{direction:ltr;unicode-bidi:isolate}
+.form{padding:24px}
+.form label{display:block;font-weight:500;margin-bottom:8px}
+.row{display:flex;gap:8px;max-width:420px}
+input{flex:1;min-width:0;font:inherit;font-size:1.05rem;font-weight:700;direction:ltr;text-align:center;padding:10px;border:1px solid var(--line);border-radius:6px}
+.go{font:inherit;font-weight:700;padding:0 22px;border:0;border-radius:6px;background:var(--navy);color:#fff;cursor:pointer}
+footer{max-width:880px;margin:auto;padding:24px 20px;color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="bar"><div class="in">
+  <div class="brand"><img src="iranfly-logo.png" alt="">IranFly</div>
+</div></div>
+
+<div class="hero" id="hero"><div class="in"><h1 id="hname"></h1><p id="haddr"></p></div></div>
+
+<main>
+  <div class="card">
+    <div id="result"></div>
+    <div class="form" id="form" hidden>
+      <label for="code" data-t="label"></label>
+      <div class="row"><input id="code" autocomplete="off" placeholder="5602517140"><button class="go" id="go" data-t="btn"></button></div>
+    </div>
+  </div>
+</main>
+
+<footer><span data-t="issued"></span><span><span data-t="phone"></span>: <span class="ltr">+995-574144513 · +9955557227134</span></span></footer>
+
+<script>
+// One line per voucher — code = PNR without dots
+const BOOKINGS = {
+  '5602517140': {
+    hotel:'Avantgarde Hotel', addr:'7b Sherif Khimshiashvili Street, 6000 Batumi, Georgia',
+    guest:'SAEID K****', checkin:'17 JUL 2026 · 14:00', checkout:'20 JUL 2026 · 12:00',
+    room:'One Bed Studio', guests:'1 Adult', rooms:'1', issued:'12 JUL 2026'
+  },
+  '5602517153': {
+    hotel:'Avantgarde Hotel', addr:'7b Sherif Khimshiashvili Street, 6000 Batumi, Georgia',
+    guest:'ALI M****', checkin:'05 OCT 2026 · 14:00', checkout:'10 OCT 2026 · 12:00',
+    room:'One Bed Studio', guests:'1 Adult', rooms:'1', issued:'02 OCT 2026'
+  },
+};
+
+const t = {ok:'Booking confirmed',okd:'This voucher is valid and your reservation is in place.',bad:'Booking not found',badd:'This code does not exist in the reservation system. Please contact support.',
+      look:'Check a booking',lookd:'Enter the PNR number printed on your voucher.',label:'PNR number',btn:'Check',
+      guest:'Guest name',in:'Check-in',out:'Check-out',room:'Room type',guests:'Guests',rooms:'Rooms',date:'Issued',
+      issued:'Booked and issued by IranFly',phone:'Reservation support'};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const params = new URLSearchParams(location.search);
+let code = (params.get('code')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+
+function setUrl(){ try{ history.replaceState(null,'','?'+params); }catch(e){} }
+
+function render(){
+  const b = BOOKINGS[code];
+  document.querySelectorAll('[data-t]').forEach(e => e.textContent = t[e.dataset.t]);
+  $('form').hidden = !!b;
+  $('hname').textContent = b ? b.hotel : 'IranFly';
+  $('haddr').textContent = b ? b.addr : t.issued;
+  if(b){
+    const f = (k,v,ltr) => `<div><dt>${t[k]}</dt><dd${ltr?' class="ltr"':''}>${esc(v)}</dd></div>`;
+    $('result').innerHTML = `<div class="verdict ok"><div class="mark">✓</div><div><h2>${t.ok}</h2><p>${t.okd} · PNR <span class="pnr">${esc(code)}</span></p></div></div>
+      <dl class="grid">${f('guest',b.guest,1)}${f('in',b.checkin,1)}${f('out',b.checkout,1)}${f('room',b.room,1)}${f('guests',b.guests,1)}${f('rooms',b.rooms,1)}${f('date',b.issued,1)}</dl>`;
+  } else if(code){
+    $('result').innerHTML = `<div class="verdict bad"><div class="mark">✕</div><div><h2>${t.bad}</h2><p>${t.badd} · PNR <span class="pnr">${esc(code)}</span></p></div></div>`;
+  } else {
+    $('result').innerHTML = `<div class="verdict"><div><h2>${t.look}</h2><p>${t.lookd}</p></div></div>`;
+  }
+}
+function go(){
+  code = $('code').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(!code) return;
+  params.set('code',code); setUrl(); render();
+}
+$('go').onclick = go;
+$('code').onkeydown = e => { if(e.key==='Enter') go(); };
+render();
+</script>
+</body>
+</html>

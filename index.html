@@ -67,13 +67,18 @@ footer{max-width:880px;margin:auto;padding:24px 20px;color:var(--muted);font-siz
 const BOOKINGS = {
   '5602517140': {
     hotel:'Avantgarde Hotel', addr:'7b Sherif Khimshiashvili Street, 6000 Batumi, Georgia',
-    guest:'SAEID K****', checkin:'17 JUL 2026 · 14:00', checkout:'20 JUL 2026 · 12:00',
+    guest:'SAEID KIANI', checkin:'17 JUL 2026 · 14:00', checkout:'20 JUL 2026 · 12:00',
     room:'One Bed Studio', guests:'1 Adult', rooms:'1', issued:'12 JUL 2026'
   },
   '5602517153': {
     hotel:'Avantgarde Hotel', addr:'7b Sherif Khimshiashvili Street, 6000 Batumi, Georgia',
     guest:'ALI MALEKLOO', checkin:'05 OCT 2026 · 14:00', checkout:'10 OCT 2026 · 12:00',
     room:'One Bed Studio', guests:'1 Adult', rooms:'1', issued:'02 OCT 2026'
+  },
+  '1281114142': {
+    hotel:'Batesti Hotel', addr:'14 Givi Kartozia Street, Saburtalo, 0186 Tbilisi, Georgia', img:'batesti.jpg',
+    guest:'MOHAMMAD SALEH BOOZARIMOGHADDAM', checkin:'04 OCT 2026 · 14:00', checkout:'07 OCT 2026 · 12:00',
+    room:'Double Room', guests:'1 Adult', rooms:'1', issued:'04 OCT 2026'
   },
 };
 
@@ -94,6 +99,7 @@ function render(){
   document.querySelectorAll('[data-t]').forEach(e => e.textContent = t[e.dataset.t]);
   $('form').hidden = !!b;
   $('hname').textContent = b ? b.hotel : 'IranFly';
+  $('hero').style.backgroundImage = `url("${(b && b.img) || 'hotel.jpg'}")`;
   $('haddr').textContent = b ? b.addr : t.issued;
   if(b){
     const f = (k,v,ltr) => `<div><dt>${t[k]}</dt><dd${ltr?' class="ltr"':''}>${esc(v)}</dd></div>`;
